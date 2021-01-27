@@ -1768,7 +1768,7 @@ function isIn(str, options) {
 
 /* eslint-disable max-len */
 
-var creditCard = /^(?:4[0-9]{12}(?:[0-9]{3,6})?|5[1-5][0-9]{14}|(222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}|6(?:011|5[0-9][0-9])[0-9]{12,15}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11}|6[27][0-9]{14})$/;
+var creditCard = /^(?:4[0-9]{12}(?:[0-9]{3,6})?|5[0-9][0-9]{14}|(222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}|6(?:011|5[0-9][0-9])[0-9]{12,15}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11}|6[27][0-9]{14})$/;
 /* eslint-enable max-len */
 
 function isCreditCard(str) {
@@ -1778,6 +1778,21 @@ function isCreditCard(str) {
   if (!creditCard.test(sanitized)) {
     return false;
   }
+  /*
+  Handle the credit cards that have a valid issuer identification number (IIN),
+  but the Luhn algorithm that is used below handles them as invalid.
+  */
+
+
+  var inn = parseInt(sanitized.substring(0, 6), 10);
+
+  if (inn >= 506099 && inn <= 506198 || inn >= 650002 && inn <= 650027 || inn === 357111) {
+    return !!sanitized;
+  }
+  /*
+  Luhn algorithm that validates the card numbers.
+  */
+
 
   var sum = 0;
   var digit;
@@ -2699,7 +2714,7 @@ function elGrCheck(tin) {
     checksum += digits[i] * Math.pow(2, 8 - i);
   }
 
-  return checksum % 11 === digits[8];
+  return checksum % 11 % 10 === digits[8];
 }
 /*
  * en-GB validation function (should go here if needed)
@@ -3867,7 +3882,7 @@ var phones = {
   'tr-TR': /^(\+?90|0)?5\d{9}$/,
   'uk-UA': /^(\+?38|8)?0\d{9}$/,
   'uz-UZ': /^(\+?998)?(6[125-79]|7[1-69]|88|9\d)\d{7}$/,
-  'vi-VN': /^(\+?84|0)((3([2-9]))|(5([2689]))|(7([0|6-9]))|(8([1-6|89]))|(9([0-9])))([0-9]{7})$/,
+  'vi-VN': /^(\+?84|0)((3([2-9]))|(5([2689]))|(7([0|6-9]))|(8([1-9]))|(9([0-9])))([0-9]{7})$/,
   'zh-CN': /^((\+|00)86)?1([3568][0-9]|4[579]|6[67]|7[01235678]|9[012356789])[0-9]{8}$/,
   'zh-TW': /^(\+?886\-?|0)?9\d{8}$/
 };
